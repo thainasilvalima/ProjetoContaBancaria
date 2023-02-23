@@ -12,16 +12,7 @@ public class Menu {
 	public static void main(String[] args) {
 		
 		Scanner read = new Scanner(System.in);
-		int opc; 
-		
-		// teste de classe conta
-		
-		Conta c1 = new Conta  (1, 245, 1, "Jake Peralta", 10000.0f);
-		c1.visualizar();
-		c1.sacar(12000.0f);
-		c1.visualizar();
-		c1.depositar(5000.0f);
-		c1.visualizar();
+		int opc;
 		
 		//teste conta corrente
 		
