@@ -1,7 +1,10 @@
 package Conta;
 
+import java.io.IOException;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 import ProjetoContaBancaria.util.Cores;
+import ProjetoContaBancaria.controller.ContaController;
 import ProjetoContaBancaria.model.Conta;
 import ProjetoContaBancaria.model.ContaCorrente; 
 import ProjetoContaBancaria.model.ContaPoupanca;
@@ -9,28 +12,34 @@ import ProjetoContaBancaria.model.ContaPoupanca;
 
 public class Menu {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) { 
+		
+		ContaController contas = new ContaController();
 		
 		Scanner read = new Scanner(System.in);
-		int opc;
 		
-		//teste conta corrente
+		int opc, numero, agencia,tipo,aniversario;
 		
-		ContaCorrente  cc1 = new ContaCorrente (2,245,1,"Rosa Diaz", 15000.0f, 1000.0f);
-		cc1.visualizar();
-		cc1.sacar(12000.0f);
-		cc1.visualizar();
-		cc1.depositar(5000.0f);
-		cc1.visualizar();
+		String titular;
 		
-		//teste conta poupança
+		float saldo,limite;
 		
-		ContaPoupanca cp1 = new ContaPoupanca (2, 245, 1,"Raymond Rolt", 100000.0f, 15);
-		cp1.visualizar();
-		cp1.sacar(1000.0f);
-		cp1.visualizar();
-		cp1.depositar(5000.0f);
-		cp1.visualizar();
+		System.out.println("\n Criar Contas ");
+		
+		ContaCorrente cc1 = new ContaCorrente(contas.gerarNumero(), 123,1,"Jake Peralta",1000f,100.0f);
+		contas.cadastrar(cc1);
+		
+		ContaCorrente cc2 = new ContaCorrente(contas.gerarNumero(), 124,1,"Rosa Diaz",2000f,100.0f);
+		contas.cadastrar(cc2);
+		
+		ContaPoupanca cp1 = new ContaPoupanca(contas.gerarNumero(), 125,2,"Raymond Holt",4000f,12);
+		contas.cadastrar(cp1);
+		
+		ContaPoupanca cp2 = new ContaPoupanca(contas.gerarNumero(), 125,2,"Gina Linetti",8000f,15);
+		contas.cadastrar(cp2);
+		
+		
+		contas.listarTodas();
 		
 		
 		while (true) {
@@ -57,7 +66,14 @@ public class Menu {
 		    System.out.println("                                           " 
 		    + Cores.TEXT_RESET);
 		    
-		    opc = read.nextInt();
+		    try {
+				opc = read.nextInt();
+			}catch(InputMismatchException e){
+				System.out.println("\nDigite valores inteiros!");
+				read.nextLine();
+				opc=0;
+			}
+
 		    
 		    if (opc ==9) {
 		    	System.out.println(Cores.TEXT_GREEN_BRIGHT + "\n thaibank - aqui seu dinheiro vale!! ");
@@ -66,29 +82,129 @@ public class Menu {
 		    }
 		    
 		    switch (opc) {
+		    
 		    case 1: System.out.println(Cores.TEXT_CYAN +"\n Criar a conta \n\n");
+		    
+		    System.out.println("\nDigite o número da Agência: ");
+		    agencia = read.nextInt();
+		    System.out.println("\n Digite o nome do Titular: ");
+		    read.skip("\\R?");
+		    titular = read.nextLine();
+		    
+		    do {
+		    System.out.println("\n Digite o tipo de Conta (1- Conta Corrente ou 2- Conta Poupança): ");
+		    tipo = read.nextInt();
+		    }
+		    while (tipo < 1 && tipo > 2);
+		    
+		    System.out.println("\n Digite o saldo da Conta R$: ");
+		    saldo = read.nextFloat();
+		    
+		    switch(tipo) {
+		    case 1 -> {
+		    System.out.println("\n Digite o Limite de crédito R$: ");
+		    limite = read.nextFloat();
+		    contas.cadastrar(new ContaCorrente(contas.gerarNumero(), agencia, tipo, titular, saldo, limite));
+		    }
+		    case 2 -> {
+		    System.out.println("\n Digite o dia do aniversário da conta: ");
+		    aniversario = read.nextInt();
+		    contas.cadastrar(new ContaPoupanca(contas.gerarNumero(), agencia, tipo, titular, saldo, aniversario));
+		    }
+		    
+		    }
+		    keyPress();
 		    break;
+		    
 		    case 2: System.out.println(Cores.TEXT_CYAN +"\n Listar todas as contas \n\n");
+		    contas.listarTodas();
+		    
+		    keyPress();
 		    break;
+		    
 		    case 3: System.out.println(Cores.TEXT_CYAN +"\n Consultar dados da conta - por número \n\n");
+		    
+		    System.out.println("\nDigite o número da conta: ");
+		    numero = read.nextInt();
+		    contas.procurarPorNumero(numero);
+		    
+		    keyPress();
 		    break;
+		    
 		    case 4: System.out.println(Cores.TEXT_CYAN +"\n Atualizar dados da Conta \n\n");
+		    
+		    System.out.println("\nDigite o número da conta: ");
+		    numero = read.nextInt();
+		    
+		    if (contas.buscarNaCollection(numero) !=null) {
+		    
+		    System.out.println("\nDigite o número da Agência: ");
+		    agencia = read.nextInt();
+		    System.out.println("\n Digite o nome do Titular: ");
+		    read.skip("\\R?");
+		    titular = read.nextLine();
+		    
+		    System.out.println("\n Digite o saldo da Conta R$: ");
+		    saldo = read.nextFloat();
+		    
+		    tipo = contas.retornaTipo(numero);
+		    
+		    switch (tipo) {
+		    case 1 -> {
+			    System.out.println("\n Digite o Limite de crédito R$: ");
+			    limite = read.nextFloat();
+			    contas.atualizar(new ContaCorrente(numero, agencia, tipo, titular, saldo, limite));
+			    }
+			    case 2 -> {
+			    System.out.println("\n Digite o dia do aniversário da conta: ");
+			    aniversario = read.nextInt();
+			    contas.atualizar(new ContaPoupanca(numero, agencia, tipo, titular, saldo, aniversario));
+			    }
+			    default -> {
+			    	System.out.println("\nTipo de conta inválido!");
+		    } 
+		    
+		    }
+		   
+		    } else System.out.println("\nConta não encontrada!");
+		    
+		    keyPress();
 		    break;
+		    
 		    case 5: System.out.println(Cores.TEXT_CYAN +"\n Apagar Conta\n\n");
+		    
+		    System.out.println("\nDigite o número da conta: ");
+		    numero = read.nextInt();
+		    
+		    contas.deletar(numero);
+		    
+		    keyPress();
 		    break;
+		    
 		    case 6: System.out.println(Cores.TEXT_CYAN +"\nSaque\n\n");
+		    keyPress();
 		    break;
+		    
 		    case 7: System.out.println(Cores.TEXT_CYAN +"\nDepósito\n\n");
+		    keyPress();
 		    break;
+		    
 		    case 8: System.out.println(Cores.TEXT_CYAN +"\n Transferência entre Contas\n\n");
+		    keyPress();
 		    break;
+		    
 		    default: System.out.println(Cores.TEXT_RED +"\n Opção inválida\n\n");
+		    keyPress();
 		    break;
 		    
 		    }
-
-
 		}
 	}
+	       public static void keyPress() {
+	    	   try {System.out.println(Cores.TEXT_RESET + "\n\nPressione Enter para Continuar...");
+	    	   System.in.read();
+	    	   }
+	    	   catch (IOException e) { System.out.println("Você pressionou uma tecla diferente de enter!");}
+	       }
 
 }
